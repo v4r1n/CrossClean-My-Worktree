@@ -6,6 +6,8 @@
 ![Swift 5.10+](https://img.shields.io/badge/Swift-5.10%2B-orange)
 ![License: MIT](https://img.shields.io/badge/license-MIT-green)
 
+![Clean My Worktree: every worktree on your Mac in one window, with repository, branch, status, last activity and disk usage](docs/promo.png)
+
 If you use `git worktree`, or AI coding agents that create a worktree for every task, they pile up quickly. Each one is a full checkout, often with its own `node_modules` or build output, and it's easy to forget them in `.worktrees/`, `.claude/worktrees/`, `/tmp` or wherever the last session left them.
 
 Clean My Worktree (CleanMyWT) scans your Mac and lists every worktree in one window. You can see which repo each one belongs to, whether it still holds unsaved work, and how much space deleting it gives back. Then you delete them all at once or pick the ones you want.
