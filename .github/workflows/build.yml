@@ -1,0 +1,52 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build universal app
+        run: |
+          if [[ "$GITHUB_REF_TYPE" == "tag" ]]; then
+            ./scripts/build-app.sh --universal --zip --version "$GITHUB_REF_NAME"
+          else
+            ./scripts/build-app.sh --universal --zip
+          fi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: CleanMyWT
+          path: dist/*
+
+      - name: Publish release
+        if: github.ref_type == 'tag'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          cat > notes.md <<NOTES
+          ## Install
+
+          1. Download **CleanMyWT-${VERSION}.zip** below, unzip it and drag **CleanMyWT.app** to Applications.
+          2. The first time you open it, macOS blocks it because the app isn't notarized by Apple.
+             - macOS 15 or later: click **Done**, then go to **System Settings → Privacy & Security** and click **Open Anyway**.
+             - macOS 14: right-click the app, choose **Open**, then **Open** again.
+             - Or run \`xattr -dr com.apple.quarantine /Applications/CleanMyWT.app\` in Terminal.
+
+          Requires macOS 14 or later (Apple silicon or Intel) and git. See the [README](https://github.com/${GITHUB_REPOSITORY}#readme) for details.
+
+          \`wtscan-${VERSION}.zip\` is the optional command-line tool. \`SHA256SUMS.txt\` lists checksums for both downloads.
+          NOTES
+          gh release create "$GITHUB_REF_NAME" dist/* \
+            --title "Clean My Worktree ${VERSION}" \
+            --notes-file notes.md

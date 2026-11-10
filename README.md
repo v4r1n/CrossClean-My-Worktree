@@ -5,6 +5,7 @@
 ![macOS 14+](https://img.shields.io/badge/macOS-14%2B-blue)
 ![Swift 5.10+](https://img.shields.io/badge/Swift-5.10%2B-orange)
 ![License: MIT](https://img.shields.io/badge/license-MIT-green)
+[![Latest release](https://img.shields.io/github/v/release/poomsc/Clean-My-Worktree)](https://github.com/poomsc/Clean-My-Worktree/releases/latest)
 
 ![Clean My Worktree: every worktree on your Mac in one window, with repository, branch, status, last activity and disk usage](docs/promo.png)
 
@@ -22,18 +23,56 @@ Clean My Worktree (CleanMyWT) scans your Mac and lists every worktree in one win
 - **Cleans up stale records.** It finds worktrees whose folder is already gone and worktrees whose repository was deleted.
 - **Includes a command-line tool.** `wtscan` prints the same report in the terminal.
 
+## Requirements
+
+- **macOS 14 Sonoma or later**, on Apple silicon or Intel.
+- **git.** If you already use git on this Mac, you have it. If not, run `xcode-select --install` in Terminal (or `brew install git`). Without git, macOS offers to install it the first time the app scans.
+
 ## Install
 
-There are no prebuilt releases yet, so build from source. You need macOS 14 or later and the Xcode Command Line Tools (`xcode-select --install`); full Xcode isn't required.
+### Download (recommended)
+
+1. Download **CleanMyWT-x.y.z.zip** from the [latest release](https://github.com/poomsc/Clean-My-Worktree/releases/latest).
+2. Unzip it, then drag **CleanMyWT.app** into your **Applications** folder.
+3. Open the app. The first time, macOS blocks it, because it isn't notarized by Apple (notarizing needs a paid Apple developer account). Allow it once:
+   - **macOS 15 Sequoia or later:** in the "not opened" dialog, click **Done**. Then open **System Settings → Privacy & Security**, scroll down to the message about CleanMyWT, click **Open Anyway** and confirm with your password or Touch ID.
+   - **macOS 14 Sonoma:** right-click (or Control-click) the app, choose **Open**, then click **Open** again.
+   - **Or, in Terminal:** `xattr -dr com.apple.quarantine /Applications/CleanMyWT.app`
+
+   After that it opens normally. If you'd rather not run an unnotarized download, [build it from source](#build-from-source) instead.
+
+To check the download, compare `shasum -a 256 CleanMyWT-x.y.z.zip` with the value in `SHA256SUMS.txt` on the release page.
+
+### Command-line tool (optional)
+
+Download **wtscan-x.y.z.zip** from the same release, then:
+
+```bash
+unzip wtscan-*.zip
+xattr -d com.apple.quarantine wtscan
+sudo mkdir -p /usr/local/bin && sudo mv wtscan /usr/local/bin/
+```
+
+### Build from source
+
+You need the Xcode Command Line Tools (`xcode-select --install`); full Xcode isn't required. A build takes about a minute.
 
 ```bash
 git clone https://github.com/poomsc/Clean-My-Worktree.git
 cd Clean-My-Worktree
-./scripts/build-app.sh            # builds build/CleanMyWT.app and build/wtscan
-./scripts/build-app.sh --install  # also copies the app to /Applications
+./scripts/build-app.sh --install   # builds the app and copies it to /Applications
 ```
 
-The app is ad-hoc signed. On first launch, if macOS says it can't verify the developer, right-click the app and choose **Open**.
+The script also creates `build/wtscan`. Other options: `--universal` builds for both Apple silicon and Intel, and `--zip` writes release archives to `dist/`. An app you build yourself opens without the Gatekeeper prompt.
+
+### First launch
+
+- The app scans your home folder straight away.
+- macOS asks whether CleanMyWT may access folders such as **Documents**, **Desktop** and **Downloads**. Allow it so the app can find worktrees there. If you click **Don't Allow**, those folders are skipped; you can change this later in **System Settings → Privacy & Security → Files & Folders**.
+
+### Uninstall
+
+Drag **CleanMyWT.app** to the Trash. To also remove its saved settings (scan location and recent folders), run `defaults delete app.cleanmywt.CleanMyWT`.
 
 ## Usage
 
@@ -67,10 +106,12 @@ Git keeps a record of each worktree in `<repo>/.git/worktrees/<name>`. If the fo
 ## Command line
 
 ```bash
-build/wtscan                     # scan your home folder
-build/wtscan ~/code ~/work       # scan specific folders
-build/wtscan --no-size           # skip disk usage (much faster)
+wtscan                     # scan your home folder
+wtscan ~/code ~/work       # scan specific folders
+wtscan --no-size           # skip disk usage (much faster)
 ```
+
+(If you built from source and didn't install it, run `build/wtscan` instead.)
 
 ```
 SAFE    my-api        388.6 MB  388.6 MB  feat/new-endpoint     merged          ~/code/.worktrees/new-endpoint
@@ -107,9 +148,10 @@ Sources/
   CleanMyWT/     the SwiftUI app
   wtscan/        the command-line tool
 scripts/
-  build-app.sh   builds and bundles the .app
+  build-app.sh   builds and bundles the .app (and release zips)
   make-icon.swift  renders the app icon
 Resources/       Info.plist and the app icon
+.github/workflows/build.yml  CI build; pushing a v* tag publishes a release
 ```
 
 For a debug build, run `swift build`, then `.build/debug/CleanMyWT` or `.build/debug/wtscan`.
