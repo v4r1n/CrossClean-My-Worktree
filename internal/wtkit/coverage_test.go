@@ -346,3 +346,16 @@ func joinPhases(phases []Phase) string {
 	}
 	return strings.Join(parts, ",")
 }
+
+func TestRealResolvesMissingPathsThroughExistingParent(t *testing.T) {
+	base := t.TempDir()
+	link := filepath.Join(t.TempDir(), "link")
+	if err := os.Symlink(base, link); err != nil {
+		t.Skipf("symlinks unsupported: %v", err)
+	}
+	got := Real(filepath.Join(link, "gone", "deeper"))
+	want := filepath.Join(Real(base), "gone", "deeper")
+	if Key(got) != Key(want) {
+		t.Fatalf("Real through symlinked parent = %s, want %s", got, want)
+	}
+}

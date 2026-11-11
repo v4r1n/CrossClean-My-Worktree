@@ -18,8 +18,9 @@ func Home() string {
 	return string(filepath.Separator)
 }
 
-// Real returns the absolute path with symlinks resolved, or the cleaned
-// absolute path when it can't be resolved (e.g. it no longer exists).
+// Real returns the absolute path with symlinks resolved. For a path that no
+// longer exists it resolves the nearest existing parent and appends the rest,
+// so a deleted worktree under /var on macOS still matches git's /private/var.
 func Real(path string) string {
 	abs, err := filepath.Abs(path)
 	if err != nil {
@@ -28,7 +29,11 @@ func Real(path string) string {
 	if resolved, err := filepath.EvalSymlinks(abs); err == nil {
 		return resolved
 	}
-	return abs
+	parent := filepath.Dir(abs)
+	if parent == abs {
+		return abs
+	}
+	return filepath.Join(Real(parent), filepath.Base(abs))
 }
 
 // Key normalises a path for comparison: cleaned, and lower-cased on Windows,

@@ -85,6 +85,8 @@
 - Tests ใหม่: cmd (รวม build binary จริง), app unit + HTTP E2E, wtkit coverage (remote/bare/lock/prune/fallback/badges), longPath (Windows)
 - Playwright 9 tests (`e2e/`), coverage gate script, CI jobs `test`+`e2e` × 3 OS, release smoke-tests linux zip
 - ไม่ tag (ผู้ใช้สั่งไว้ก่อนหน้า)
+- CI รอบแรกของชุดนี้ fail 4 จุด: Windows gofmt (checkout CRLF → `.gitattributes *.go eol=lf`), macOS `Real()` ของ path ที่ไม่มีแล้วไม่ resolve `/var`→`/private/var` (**bug จริง** แก้ให้ resolve ผ่าน parent ที่มีอยู่), ubuntu ไม่มี terminal emulator (stub `lookPath` ใน E2E), apt mirror ล่ม (retry `playwright install`)
+- Symlink test skip บน Windows (ไม่มีสิทธิ์สร้าง symlink) → RED/GREEN ของ fix `Real()` พิสูจน์บน CI macOS/Linux เท่านั้น
 
 ### 2026-11-11 — Initial cross-platform port
 - Clone upstream → ถามผู้ใช้: เลือก **Go + local web UI** และ **แทนที่ Swift ทั้งหมด**

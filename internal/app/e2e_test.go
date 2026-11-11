@@ -188,6 +188,8 @@ func TestEndToEndOpenUsesPlatformCommand(t *testing.T) {
 	root := t.TempDir()
 	fx := testrepo.NewFixture(t, root)
 	started := recordCommands(t)
+	// CI runners have no terminal emulator or Windows Terminal; pretend they do.
+	asOS(t, goos, map[string]bool{"wt.exe": true, "x-terminal-emulator": true})
 	c := startServer(t)
 	c.call("POST", "/api/scan", Target{Kind: "folder", Path: root}, nil)
 	snap := c.waitUntil("scan", func(s Snapshot) bool { return s.Progress.Phase == wtkit.PhaseIdle && s.LastScan != nil })

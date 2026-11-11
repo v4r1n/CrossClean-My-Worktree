@@ -22,6 +22,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - `cleanmywt` stops a running scan when it shuts down.
+- On macOS, a worktree whose folder is already gone under a symlinked path (such as `/var` → `/private/var`)
+  no longer fails to match git's record of it; paths that don't exist are now resolved through their
+  nearest existing parent.
 
 ## [2.0.0] - 2026-11-11
 

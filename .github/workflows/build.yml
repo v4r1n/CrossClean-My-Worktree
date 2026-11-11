@@ -26,6 +26,7 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: stable
+          cache: false
       - name: Check formatting
         run: test -z "$(gofmt -l .)" || { gofmt -l .; echo "::error::run gofmt -w ."; exit 1; }
       - name: Vet (all platforms)
@@ -58,6 +59,7 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: stable
+          cache: false
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -66,7 +68,13 @@ jobs:
       - name: Install Playwright
         run: |
           npm ci
-          npx playwright install --with-deps chromium
+          # apt mirrors on hosted runners fail now and then; retry before giving up.
+          for attempt in 1 2 3; do
+            npx playwright install --with-deps chromium && break
+            [[ $attempt == 3 ]] && exit 1
+            echo "::warning::playwright install failed (attempt $attempt), retrying"
+            sleep 20
+          done
       - name: Run end-to-end tests
         run: npx playwright test
         env:
@@ -87,6 +95,7 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: stable
+          cache: false
 
       - name: Build archives
         run: |
