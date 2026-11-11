@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Browser end-to-end tests (Playwright, Chromium) that drive the real `cleanmywt` binary on Windows, macOS
+  and Linux: scan, verdicts, filters, search, sorting, shift-click marking, safe and risky deletes, branch
+  deletion, cancel, choosing a folder, the row menu and token enforcement (`e2e/`).
+- HTTP end-to-end tests that run the full scan → delete flow against a real server and check git afterwards.
+- CLI end-to-end test that builds and runs the real `wtscan` binary.
+- CI coverage gate: total Go coverage must stay at or above 80% on every platform (`scripts/coverage.sh`).
+- CI checks `gofmt` and runs `go vet` for all three platforms.
+- The release job unzips the linux/amd64 archive and runs `wtscan` from it before uploading.
+- Tags with a pre-release suffix (e.g. `v2.1.0-rc.1`) publish a GitHub pre-release.
+
+### Fixed
+
+- `cleanmywt` stops a running scan when it shuts down.
+
 ## [2.0.0] - 2026-11-11
 
 Cross-platform rewrite of [poomsc/Clean-My-Worktree](https://github.com/poomsc/Clean-My-Worktree) 1.0.0 in Go.

@@ -1,4 +1,4 @@
-# Clean My Worktree
+# Cross Clean My Worktree
 
 **Find and remove forgotten git worktrees, and get your disk space back. Runs on Windows, macOS and Linux.**
 
@@ -160,12 +160,24 @@ internal/
   app/web/         the browser UI (plain HTML, CSS and JavaScript, embedded in the binary)
 scripts/
   dist.sh          cross-compiles release zips
+  coverage.sh      runs the Go tests with an 80% coverage gate
+e2e/               browser end-to-end tests (Playwright)
 docs/              CHANGELOG, MIGRATING (from the macOS app), DECISIONS (ADRs), MEMORY (project state)
 CLAUDE.md          guide for AI coding assistants
-.github/workflows/build.yml  tests on Windows, macOS and Linux; pushing a v* tag publishes a release
+.github/workflows/build.yml  tests, coverage gate and browser E2E on Windows, macOS and Linux; a v* tag publishes a release
 ```
 
-Run the tests with `go test ./...`. They create throwaway repositories in a temp folder and need git.
+### Tests
+
+Every test creates throwaway repositories in a temp folder and needs git. CI runs all of them on Windows, macOS and Linux.
+
+| What | Command | Covers |
+| --- | --- | --- |
+| Unit and integration | `go test ./...` | scanning, verdicts, disk usage, removal, the HTTP API, settings |
+| Coverage gate | `scripts/coverage.sh` | fails below 80% total (`MIN_COVERAGE` to change) |
+| HTTP end-to-end | part of `go test ./...` (`internal/app/e2e_test.go`) | scan → delete over a real server, checked against git |
+| CLI end-to-end | part of `go test ./...` (`cmd/wtscan`) | builds and runs the real `wtscan` binary |
+| Browser end-to-end | `cd e2e && npm ci && npx playwright install chromium && npx playwright test` | the real `cleanmywt` binary driven in Chromium |
 
 ## Contributing
 

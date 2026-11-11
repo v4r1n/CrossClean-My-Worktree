@@ -10,15 +10,23 @@ import (
 	"github.com/v4r1n/CrossClean-My-Worktree/internal/wtkit"
 )
 
+// Seams for tests: which OS to act as, how to find programs, and how to start
+// them (tests record commands instead of opening windows).
+var (
+	goos         = runtime.GOOS
+	lookPath     = exec.LookPath
+	startCommand = func(cmd *exec.Cmd) error { return cmd.Start() }
+)
+
 // OpenURL opens url in the default browser.
 func OpenURL(url string) error {
-	switch runtime.GOOS {
+	switch goos {
 	case "windows":
-		return exec.Command("rundll32", "url.dll,FileProtocolHandler", url).Start()
+		return startCommand(exec.Command("rundll32", "url.dll,FileProtocolHandler", url))
 	case "darwin":
-		return exec.Command("open", url).Start()
+		return startCommand(exec.Command("open", url))
 	}
-	return exec.Command("xdg-open", url).Start()
+	return startCommand(exec.Command("xdg-open", url))
 }
 
 // Reveal shows path in the file manager, selected when the platform allows it.
@@ -27,40 +35,40 @@ func Reveal(path string) error {
 	if !wtkit.Exists(path) {
 		path = filepath.Dir(path)
 	}
-	switch runtime.GOOS {
+	switch goos {
 	case "windows":
 		// explorer.exe returns 1 even on success, so don't wait for it.
-		return exec.Command("explorer", "/select,", path).Start()
+		return startCommand(exec.Command("explorer", "/select,", path))
 	case "darwin":
-		return exec.Command("open", "-R", path).Start()
+		return startCommand(exec.Command("open", "-R", path))
 	}
-	return exec.Command("xdg-open", filepath.Dir(path)).Start()
+	return startCommand(exec.Command("xdg-open", filepath.Dir(path)))
 }
 
-// OpenTerminal opens a terminal window in path.
+// OpenTerminal opens a terminal window in path. The path is never parsed by a
+// shell, so folder names with `&`, `^`, `%` or `;` can't run commands.
 func OpenTerminal(path string) error {
 	if !wtkit.IsDirectory(path) {
 		return errors.New("the folder no longer exists")
 	}
-	switch runtime.GOOS {
+	switch goos {
 	case "windows":
 		// Windows Terminal treats ';' in its arguments as a command separator.
-		if wt, err := exec.LookPath("wt.exe"); err == nil && !strings.Contains(path, ";") {
-			return exec.Command(wt, "-d", path).Start()
+		if wt, err := lookPath("wt.exe"); err == nil && !strings.Contains(path, ";") {
+			return startCommand(exec.Command(wt, "-d", path))
 		}
-		// Start cmd.exe directly in path: no shell ever parses the path.
 		cmd := exec.Command("cmd.exe")
 		cmd.Dir = path
 		newConsole(cmd)
-		return cmd.Start()
+		return startCommand(cmd)
 	case "darwin":
-		return exec.Command("open", "-a", "Terminal", path).Start()
+		return startCommand(exec.Command("open", "-a", "Terminal", path))
 	}
 	for _, term := range []string{"x-terminal-emulator", "gnome-terminal", "konsole", "xterm"} {
-		if bin, err := exec.LookPath(term); err == nil {
+		if bin, err := lookPath(term); err == nil {
 			cmd := exec.Command(bin)
 			cmd.Dir = path
-			return cmd.Start()
+			return startCommand(cmd)
 		}
 	}
 	return errors.New("no terminal emulator found")

@@ -94,3 +94,26 @@ macOS ใช้ `st_blocks` (allocated จริง) Windows ต้องเป�
 ### Consequences
 - ✅ Stdlib only, hardlink/junction ถูกต้อง
 - ❌ เป็นค่าประมาณ: ไฟล์เล็กใน MFT / compressed / sparse แสดงเกินจริง (ระบุใน README)
+
+---
+
+## ADR-006: กลยุทธ์ทดสอบ 3 ชั้น + coverage gate + Playwright
+
+**Date:** 2026-11-11 | **Status:** Accepted
+
+### Context
+CI เดิมรันแค่ unit/integration (`go test`) — coverage 33–69%, ไม่มี E2E อัตโนมัติ (มีแค่ smoke test มือบน Windows) ผู้ใช้มีเกณฑ์ coverage ≥80% และต้องการ E2E ทั้ง macOS/Linux/Windows UI เป็น vanilla JS ที่ test ใน Go ไม่ได้
+
+### Decision
+- **ชั้น 1 — Go unit/integration**: git repo จริงใน temp (`internal/testrepo`), seam `goos`/`lookPath`/`startCommand` สำหรับคำสั่ง OS, `cmd/*` แยก `run()` ให้เรียกจาก test ได้
+- **ชั้น 2 — Go E2E**: HTTP E2E ยิง server จริงครบ scan → delete แล้วเช็คกับ git; CLI E2E build `wtscan` จริง
+- **ชั้น 3 — Browser E2E**: Playwright (Chromium) ขับ binary `cleanmywt` จริง แต่ละ test มี home + fixture + server ของตัวเอง (parallel ได้)
+- **Coverage gate 80% total** ใน CI ทุก OS (`scripts/coverage.sh`, ไม่นับ test helper)
+- Playwright pin เวอร์ชัน (`1.64.1`) อยู่ใน `e2e/package.json` แยกจาก Go module
+
+### Consequences
+- ✅ Total coverage 91% (Windows), browser flow ทดสอบจริงทั้ง 3 OS ทุก push
+- ✅ Core ยัง stdlib only — Node/Playwright เป็น dev dependency ของ `e2e/` เท่านั้น
+- ❌ CI นานขึ้น (ติดตั้ง Chromium ×3 OS)
+- ❌ Playwright ต้องอัปเดตตามเวลา (pin ไว้ — อัปเดตเอง)
+- ❌ ไม่ทดสอบ Firefox/Safari; คำสั่ง OS จริง (Explorer/Finder/terminal) ทดสอบแค่ command ที่สร้าง ไม่เปิดจริง

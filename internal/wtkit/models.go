@@ -4,6 +4,7 @@ package wtkit
 
 import (
 	"encoding/json"
+	"fmt"
 	"path/filepath"
 	"time"
 )
@@ -72,6 +73,21 @@ func (v Verdict) String() string { return verdictNames[v] }
 
 // MarshalJSON encodes the verdict as its name.
 func (v Verdict) MarshalJSON() ([]byte, error) { return json.Marshal(v.String()) }
+
+// UnmarshalJSON decodes a verdict name.
+func (v *Verdict) UnmarshalJSON(data []byte) error {
+	var name string
+	if err := json.Unmarshal(data, &name); err != nil {
+		return err
+	}
+	for i, known := range verdictNames {
+		if known == name {
+			*v = Verdict(i)
+			return nil
+		}
+	}
+	return fmt.Errorf("unknown verdict %q", name)
+}
 
 // OrphanRepoID is the RepoID of worktrees whose repository no longer exists.
 const OrphanRepoID = "orphan:"

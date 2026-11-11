@@ -14,7 +14,9 @@
 | **Tests** | `go test ./...` ผ่าน local (Windows 11, go1.26.2) + CI ubuntu/macos/windows (`-race`) |
 | **Vet** | ผ่าน windows / linux / darwin |
 | **Cross-compile** | ผ่าน 6 targets (windows/darwin/linux × amd64/arm64) |
-| **Smoke test** | Windows เท่านั้น — scan/verdict/mark/delete+branch/reveal ผ่านใน browser |
+| **Coverage** | 91.2% total local Windows (gate ≥80% ใน CI ทุก OS, `scripts/coverage.sh`) — wtkit 90%, app 95%, cmd 80/82% |
+| **E2E** | HTTP E2E + CLI E2E (Go) + browser E2E Playwright 9 tests — ผ่าน local Windows (×3 repeat ไม่ flaky) |
+| **Smoke test มือ** | Windows — scan/verdict/mark/delete+branch/reveal ผ่าน |
 
 ---
 
@@ -33,10 +35,11 @@
 ## 🔄 TODO / Pending
 
 ### ยังไม่ได้ verify
-- รันจริงบน macOS / Linux แบบใช้งาน (UI) — มีแค่ unit tests ผ่าน CI
+- macOS / Linux UI: ทดสอบผ่าน Playwright บน CI เท่านั้น (ไม่เคยเปิดมือ)
 - CI run แรก (`300e4b2`): Windows ผ่าน; Linux+macOS fail จาก test in-use เปราะ (child git ไม่อยู่ใน repo → exit ทันที) + macOS `dyld: missing LC_UUID` (Go 1.22.0) → แก้แล้ว (CI ใช้ Go stable, test ทำ `git init` + รอ child ตอบ); run ที่ 2 เขียวครบ ubuntu/macos/windows + release job (`dist.sh` สร้าง zip ได้)
 - `longPath()` fix — เครื่อง dev เปิด `LongPathsEnabled` จึง test ผ่านทั้งก่อน/หลัง fix
-- ปุ่ม "Open in terminal" ยังไม่ได้กดทดสอบจริง
+- ปุ่ม "Open in terminal" / Reveal: test แค่ command ที่สร้าง (seam) ไม่เคยเปิดจริงบน mac/Linux; Windows reveal เคยทดสอบมือ
+- CD on tag ยังไม่เคยรัน (ยังไม่ tag ตามที่ผู้ใช้สั่ง) — tag `-rc` จะเป็น pre-release
 - ยังไม่เคยดาวน์โหลด zip จาก CI ไปรันบนเครื่องอื่น
 
 ### Medium
@@ -75,6 +78,13 @@
 ---
 
 ## 📋 Session Notes (ล่าสุด)
+
+### 2026-11-11 — Tests 3 ชั้น + CI/CD (ADR-006)
+- ผู้ใช้ถามว่ามี CI/CD/unit/E2E ครบไหม → ตอบตรงๆ ว่า E2E ไม่มี + coverage 33–69% → สั่ง "ทำเลย"
+- Refactor `cmd/*` → `run()`; `system.go` seam; `internal/testrepo` shared fixture; `Verdict.UnmarshalJSON`
+- Tests ใหม่: cmd (รวม build binary จริง), app unit + HTTP E2E, wtkit coverage (remote/bare/lock/prune/fallback/badges), longPath (Windows)
+- Playwright 9 tests (`e2e/`), coverage gate script, CI jobs `test`+`e2e` × 3 OS, release smoke-tests linux zip
+- ไม่ tag (ผู้ใช้สั่งไว้ก่อนหน้า)
 
 ### 2026-11-11 — Initial cross-platform port
 - Clone upstream → ถามผู้ใช้: เลือก **Go + local web UI** และ **แทนที่ Swift ทั้งหมด**

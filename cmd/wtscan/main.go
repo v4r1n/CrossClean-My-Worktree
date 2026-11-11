@@ -20,21 +20,28 @@ Lists git worktrees under the folders (default: your home folder), with status a
   --no-size   skip disk usage (much faster)`
 
 func main() {
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
+	defer stop()
+	os.Exit(run(ctx, os.Args[1:], os.Stdout, os.Stderr))
+}
+
+// run is the whole program; it returns the exit code.
+func run(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 	// Flags may appear anywhere, e.g. `wtscan ~/code --no-size`, which the flag
 	// package would treat as a folder.
 	measureSizes := true
 	var roots []string
-	for _, arg := range os.Args[1:] {
+	for _, arg := range args {
 		switch arg {
 		case "-h", "--help", "-help":
-			fmt.Println(usage)
-			return
+			fmt.Fprintln(stdout, usage)
+			return 0
 		case "--no-size", "-no-size":
 			measureSizes = false
 		default:
 			if strings.HasPrefix(arg, "-") {
-				fmt.Fprintf(os.Stderr, "wtscan: unknown option %s\n\n%s\n", arg, usage)
-				os.Exit(2)
+				fmt.Fprintf(stderr, "wtscan: unknown option %s\n\n%s\n", arg, usage)
+				return 2
 			}
 			roots = append(roots, wtkit.Real(wtkit.ExpandTilde(arg)))
 		}
@@ -44,17 +51,16 @@ func main() {
 	}
 
 	if !wtkit.GitAvailable() {
-		fmt.Fprintln(os.Stderr, "wtscan: git was not found. Install git and make sure it is on PATH.")
-		os.Exit(1)
+		fmt.Fprintln(stderr, "wtscan: git was not found. Install git and make sure it is on PATH.")
+		return 1
 	}
 
-	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
-	defer stop()
 	report := wtkit.FullScan(ctx, wtkit.Options{Roots: roots, MeasureSizes: measureSizes}, wtkit.Events{})
-	fmt.Fprintf(os.Stderr, "Scanned %d folders in %.1fs, %d repos with worktrees\n",
+	fmt.Fprintf(stderr, "Scanned %d folders in %.1fs, %d repos with worktrees\n",
 		report.DirsVisited, report.WalkTime.Seconds(), len(report.Repos))
 
-	printReport(os.Stdout, report.Worktrees)
+	printReport(stdout, report.Worktrees)
+	return 0
 }
 
 func printReport(w io.Writer, rows []wtkit.Worktree) {
