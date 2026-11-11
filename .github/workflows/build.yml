@@ -9,8 +9,13 @@ on:
 permissions:
   contents: write
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
   test:
+    name: Unit & integration (${{ matrix.os }})
     strategy:
       fail-fast: false
       matrix:
@@ -21,13 +26,61 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: stable
-      - name: Vet
-        run: go vet ./...
-      - name: Test
-        run: go test -race ./...
+      - name: Check formatting
+        run: test -z "$(gofmt -l .)" || { gofmt -l .; echo "::error::run gofmt -w ."; exit 1; }
+      - name: Vet (all platforms)
+        run: |
+          go vet ./...
+          GOOS=windows go vet ./...
+          GOOS=darwin go vet ./...
+          GOOS=linux go vet ./...
+      - name: Test with race detector and coverage gate (80%)
+        run: ./scripts/coverage.sh -race
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-${{ matrix.os }}
+          path: coverage.filtered.out
+          if-no-files-found: ignore
+
+  e2e:
+    name: Browser E2E (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        working-directory: e2e
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: e2e/package-lock.json
+      - name: Install Playwright
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+      - name: Run end-to-end tests
+        run: npx playwright test
+        env:
+          CI: "true"
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report-${{ matrix.os }}
+          path: |
+            e2e/playwright-report
+            e2e/test-results
 
   release:
-    needs: test
+    needs: [test, e2e]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -43,6 +96,17 @@ jobs:
             ./scripts/dist.sh "dev-${GITHUB_SHA::7}"
           fi
 
+      - name: Smoke-test the linux/amd64 archive
+        run: |
+          mkdir -p /tmp/smoke && cd /tmp/smoke
+          unzip -q "$GITHUB_WORKSPACE"/dist/CleanMyWT-*-linux-amd64.zip
+          ./CleanMyWT-*-linux-amd64/wtscan --help | grep -q "usage: wtscan"
+          git init -q repo && cd repo
+          git -c user.name=t -c user.email=t@e commit -q --allow-empty -m init
+          git worktree add -q ../wt
+          ../CleanMyWT-*-linux-amd64/wtscan --no-size /tmp/smoke | tee out.txt
+          grep -q "1 worktrees" out.txt
+
       - uses: actions/upload-artifact@v4
         with:
           name: CleanMyWT
@@ -54,6 +118,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           VERSION="${GITHUB_REF_NAME#v}"
+          PRERELEASE=""
+          [[ "$VERSION" == *-* ]] && PRERELEASE="--prerelease"
           cat > notes.md <<NOTES
           ## Install
 
@@ -69,8 +135,9 @@ jobs:
           | Linux | \`CleanMyWT-${VERSION}-linux-amd64.zip\` / \`linux-arm64\` |
 
           Requires git. See the [README](https://github.com/${GITHUB_REPOSITORY}#readme) for first-run notes
-          (Windows SmartScreen, macOS Gatekeeper). \`SHA256SUMS.txt\` lists checksums.
+          (Windows SmartScreen, macOS Gatekeeper) and [docs/CHANGELOG.md](https://github.com/${GITHUB_REPOSITORY}/blob/${GITHUB_REF_NAME}/docs/CHANGELOG.md)
+          for what changed. \`SHA256SUMS.txt\` lists checksums.
           NOTES
-          gh release create "$GITHUB_REF_NAME" dist/* \
+          gh release create "$GITHUB_REF_NAME" dist/* $PRERELEASE \
             --title "Clean My Worktree ${VERSION}" \
             --notes-file notes.md
