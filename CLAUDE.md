@@ -104,6 +104,8 @@ Smoke test UI: ตั้ง `APPDATA` ไปที่ temp ก่อนรัน
 - `flag` package หยุดที่ arg แรกที่ไม่ใช่ flag → `wtscan` parse เอง
 - Module เป็น go 1.22 → ห้ามใช้ `t.Context()`/`t.Chdir()` (1.24+) ใน test
 - Heredoc ใน Git Bash ยุบ backslash คู่เหลือตัวเดียว → เขียนไฟล์ที่มี Windows path literal ด้วย Write tool
+- CI E2E ใช้ Chrome ที่ติดมากับ runner (`PW_CHANNEL=chrome`) — **ห้ามกลับไปใช้ `playwright install --with-deps`**: apt index บน ubuntu runner พังแบบ deterministic (fail 3/3, ~30 นาที)
+- `defaults.run` ระดับ job **แทนที่** ของ workflow ทั้งก้อน → ต้องใส่ `shell: bash` ซ้ำ ไม่งั้น Windows รันใน PowerShell
 - `explorer.exe` exit 1 แม้สำเร็จ → `Start()` ไม่ `Run()`
 - Navigate เปลี่ยนแค่ hash ไม่ reload หน้า → `app.js` ฟัง `hashchange` เพื่อรับ token ใหม่
 

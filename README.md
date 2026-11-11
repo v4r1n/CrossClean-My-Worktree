@@ -177,7 +177,7 @@ Every test creates throwaway repositories in a temp folder and needs git. CI run
 | Coverage gate | `scripts/coverage.sh` | fails below 80% total (`MIN_COVERAGE` to change) |
 | HTTP end-to-end | part of `go test ./...` (`internal/app/e2e_test.go`) | scan → delete over a real server, checked against git |
 | CLI end-to-end | part of `go test ./...` (`cmd/wtscan`) | builds and runs the real `wtscan` binary |
-| Browser end-to-end | `cd e2e && npm ci && npx playwright install chromium && npx playwright test` | the real `cleanmywt` binary driven in Chromium |
+| Browser end-to-end | `cd e2e && npm ci && npx playwright install chromium && npx playwright test` (or skip the install and set `PW_CHANNEL=chrome` to use your installed Chrome) | the real `cleanmywt` binary driven in Chromium |
 
 ## Contributing
 

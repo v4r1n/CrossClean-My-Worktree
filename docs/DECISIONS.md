@@ -114,6 +114,7 @@ CI เดิมรันแค่ unit/integration (`go test`) — coverage 33�
 ### Consequences
 - ✅ Total coverage 91% (Windows), browser flow ทดสอบจริงทั้ง 3 OS ทุก push
 - ✅ Core ยัง stdlib only — Node/Playwright เป็น dev dependency ของ `e2e/` เท่านั้น
-- ❌ CI นานขึ้น (ติดตั้ง Chromium ×3 OS)
+- ❌ CI นานขึ้น
+- CI ใช้ Google Chrome ที่ preinstall บน hosted runner (`PW_CHANNEL=chrome`) แทน `playwright install --with-deps` — apt บน ubuntu runner fail 3/3 ครั้ง; local ใช้ Chromium ของ Playwright หรือ `PW_CHANNEL=chrome` ก็ได้
 - ❌ Playwright ต้องอัปเดตตามเวลา (pin ไว้ — อัปเดตเอง)
 - ❌ ไม่ทดสอบ Firefox/Safari; คำสั่ง OS จริง (Explorer/Finder/terminal) ทดสอบแค่ command ที่สร้าง ไม่เปิดจริง

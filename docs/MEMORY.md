@@ -86,6 +86,8 @@
 - Playwright 9 tests (`e2e/`), coverage gate script, CI jobs `test`+`e2e` × 3 OS, release smoke-tests linux zip
 - ไม่ tag (ผู้ใช้สั่งไว้ก่อนหน้า)
 - CI รอบแรกของชุดนี้ fail 4 จุด: Windows gofmt (checkout CRLF → `.gitattributes *.go eol=lf`), macOS `Real()` ของ path ที่ไม่มีแล้วไม่ resolve `/var`→`/private/var` (**bug จริง** แก้ให้ resolve ผ่าน parent ที่มีอยู่), ubuntu ไม่มี terminal emulator (stub `lookPath` ใน E2E), apt mirror ล่ม (retry `playwright install`)
+- CI รอบสอง: unit ผ่าน mac (90.1%) + windows (91.3%); ubuntu fail เพราะ test reveal คาดชื่อ worktree แต่ Linux เปิด parent (แก้ test); E2E windows fail เพราะ job `defaults.run` ทับ `shell: bash`; E2E ubuntu apt fail 3/3 → เปลี่ยนไปใช้ Chrome ที่ติดมากับ runner
+- Commit `f1af700` (fix(wtkit)) ติดไฟล์ CI ไปด้วยเพราะ `git add --renormalize .` stage ทุกอย่าง — push แล้ว ไม่ force push
 - Symlink test skip บน Windows (ไม่มีสิทธิ์สร้าง symlink) → RED/GREEN ของ fix `Real()` พิสูจน์บน CI macOS/Linux เท่านั้น
 
 ### 2026-11-11 — Initial cross-platform port
