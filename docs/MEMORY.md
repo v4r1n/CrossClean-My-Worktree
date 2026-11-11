@@ -11,7 +11,7 @@
 | **Version** | 2.0.0 (ยังไม่ tag / ยังไม่ release) |
 | **Branch** | `main` → push ไป `v4r1n/CrossClean-My-Worktree` |
 | **Upstream** | `poomsc/Clean-My-Worktree` v1.0.0 (history 3 commit ของ upstream อยู่ใน repo นี้) |
-| **Tests** | `go test ./...` ผ่าน (Windows 11, go1.26.2, git 2.x) |
+| **Tests** | `go test ./...` ผ่าน local (Windows 11, go1.26.2) + CI ubuntu/macos/windows (`-race`) |
 | **Vet** | ผ่าน windows / linux / darwin |
 | **Cross-compile** | ผ่าน 6 targets (windows/darwin/linux × amd64/arm64) |
 | **Smoke test** | Windows เท่านั้น — scan/verdict/mark/delete+branch/reveal ผ่านใน browser |
@@ -34,10 +34,10 @@
 
 ### ยังไม่ได้ verify
 - รันจริงบน macOS / Linux แบบใช้งาน (UI) — มีแค่ unit tests ผ่าน CI
-- CI run แรก (`300e4b2`): Windows ผ่าน; Linux+macOS fail จาก test in-use เปราะ (child git ไม่อยู่ใน repo → exit ทันที) + macOS `dyld: missing LC_UUID` (Go 1.22.0) → แก้ใน commit ถัดไป: CI ใช้ Go stable, test ทำ `git init` + รอ child ตอบ
+- CI run แรก (`300e4b2`): Windows ผ่าน; Linux+macOS fail จาก test in-use เปราะ (child git ไม่อยู่ใน repo → exit ทันที) + macOS `dyld: missing LC_UUID` (Go 1.22.0) → แก้แล้ว (CI ใช้ Go stable, test ทำ `git init` + รอ child ตอบ); run ที่ 2 เขียวครบ ubuntu/macos/windows + release job (`dist.sh` สร้าง zip ได้)
 - `longPath()` fix — เครื่อง dev เปิด `LongPathsEnabled` จึง test ผ่านทั้งก่อน/หลัง fix
 - ปุ่ม "Open in terminal" ยังไม่ได้กดทดสอบจริง
-- `scripts/dist.sh` ไม่ได้รันเต็ม (Windows ไม่มี `zip`)
+- ยังไม่เคยดาวน์โหลด zip จาก CI ไปรันบนเครื่องอื่น
 
 ### Medium
 - Native folder picker (ตอนนี้พิมพ์ path) — อาจใช้ PowerShell `FolderBrowserDialog` / `osascript` / `zenity`
