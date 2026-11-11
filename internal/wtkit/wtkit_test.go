@@ -1,7 +1,9 @@
 package wtkit
 
 import (
+	"bufio"
 	"context"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -310,10 +312,16 @@ func TestResolveGitFileSkipsSubmodules(t *testing.T) {
 func TestProcessWorkingDirectoriesSeesChildProcess(t *testing.T) {
 	requireGit(t)
 	dir := Real(t.TempDir())
+	git(t, dir, "init", "-q")
 	// `git cat-file --batch` waits on stdin, so it sits in dir until we close it.
+	// It needs a repository, or it exits at once.
 	cmd := exec.Command("git", "cat-file", "--batch")
 	cmd.Dir = dir
 	stdin, err := cmd.StdinPipe()
+	if err != nil {
+		t.Fatal(err)
+	}
+	stdout, err := cmd.StdoutPipe()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -321,6 +329,14 @@ func TestProcessWorkingDirectoriesSeesChildProcess(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer func() { _ = stdin.Close(); _ = cmd.Wait() }()
+
+	// Wait for one answer, so the process is known to be up and waiting.
+	if _, err := io.WriteString(stdin, "HEAD\n"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := bufio.NewReader(stdout).ReadString('\n'); err != nil {
+		t.Fatalf("git cat-file did not answer: %v", err)
+	}
 
 	for _, cwd := range ProcessWorkingDirectories() {
 		if Key(Real(cwd)) == Key(dir) {

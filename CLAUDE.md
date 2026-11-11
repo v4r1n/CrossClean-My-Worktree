@@ -91,6 +91,7 @@ Smoke test UI: ตั้ง `APPDATA` ไปที่ temp ก่อนรัน
 - `go test` ผ่านเรื่อง path ยาว >260 แม้ไม่มี fix ถ้าเครื่องเปิด `LongPathsEnabled` — fix `longPath()` จำเป็นสำหรับเครื่องที่ไม่เปิด
 - Windows size = file size ปัดขึ้นตาม cluster (ประมาณการ) — ไฟล์เล็กมากอยู่ใน MFT จริงๆ ใช้ 0
 - In-use บน Windows อ่าน PEB (offset x64: `ProcessParameters` 0x20, `CurrentDirectory` 0x38) — 32-bit build คืน nil
+- Go < 1.22.6 build macOS binary ที่ dyld ปฏิเสธ (`missing LC_UUID`) → CI ใช้ `go-version: stable` ไม่ใช่ go.mod
 - `flag` package หยุดที่ arg แรกที่ไม่ใช่ flag → `wtscan` parse เอง
 - `explorer.exe` exit 1 แม้สำเร็จ → `Start()` ไม่ `Run()`
 - Navigate เปลี่ยนแค่ hash ไม่ reload หน้า → `app.js` ฟัง `hashchange` เพื่อรับ token ใหม่

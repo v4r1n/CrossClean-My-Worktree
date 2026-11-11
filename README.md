@@ -64,7 +64,7 @@ To put `wtscan` on your `PATH`: on Windows, copy it to a folder that's already o
 
 ### Build from source
 
-You need [Go](https://go.dev/dl/) 1.22 or later.
+You need [Go](https://go.dev/dl/) 1.22.6 or later (earlier 1.22 releases build macOS binaries that recent macOS refuses to load).
 
 ```bash
 git clone https://github.com/v4r1n/CrossClean-My-Worktree.git

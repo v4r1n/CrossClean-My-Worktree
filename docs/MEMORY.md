@@ -33,8 +33,8 @@
 ## 🔄 TODO / Pending
 
 ### ยังไม่ได้ verify
-- รันจริงบน macOS / Linux (ผ่านแค่ compile + vet) — CI ยังไม่เคยรัน (จะรันครั้งแรกหลัง push)
-- `-race` ยังไม่ได้รันบนเครื่อง (CI รัน)
+- รันจริงบน macOS / Linux แบบใช้งาน (UI) — มีแค่ unit tests ผ่าน CI
+- CI run แรก (`300e4b2`): Windows ผ่าน; Linux+macOS fail จาก test in-use เปราะ (child git ไม่อยู่ใน repo → exit ทันที) + macOS `dyld: missing LC_UUID` (Go 1.22.0) → แก้ใน commit ถัดไป: CI ใช้ Go stable, test ทำ `git init` + รอ child ตอบ
 - `longPath()` fix — เครื่อง dev เปิด `LongPathsEnabled` จึง test ผ่านทั้งก่อน/หลัง fix
 - ปุ่ม "Open in terminal" ยังไม่ได้กดทดสอบจริง
 - `scripts/dist.sh` ไม่ได้รันเต็ม (Windows ไม่มี `zip`)
