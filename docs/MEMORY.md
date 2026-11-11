@@ -15,7 +15,8 @@
 | **Vet** | ผ่าน windows / linux / darwin |
 | **Cross-compile** | ผ่าน 6 targets (windows/darwin/linux × amd64/arm64) |
 | **Coverage** | 91.2% total local Windows (gate ≥80% ใน CI ทุก OS, `scripts/coverage.sh`) — wtkit 90%, app 95%, cmd 80/82% |
-| **E2E** | HTTP E2E + CLI E2E (Go) + browser E2E Playwright 9 tests — ผ่าน local Windows (×3 repeat ไม่ flaky) |
+| **E2E** | HTTP E2E + CLI E2E (Go) + browser E2E Playwright 9 tests — ผ่าน local Windows (×3 repeat) + CI ubuntu/macos/windows |
+| **CI** | run `43053456774` (`31be1f8`) เขียวครบ: unit ubuntu 90.2% / macos 90.1% / windows 91.3%, E2E 9/9 ×3 OS, release + smoke linux zip ผ่าน |
 | **Smoke test มือ** | Windows — scan/verdict/mark/delete+branch/reveal ผ่าน |
 
 ---
