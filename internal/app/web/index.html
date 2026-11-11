@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Clean My Worktree</title>
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="app.css">
+<script src="app.js" defer></script>
+</head>
+<body>
+<header class="toolbar">
+  <div class="brand"><img src="icon.svg" alt="" width="22" height="22"> Clean My Worktree</div>
+  <label class="field">
+    <span class="sr">Scan location</span>
+    <select id="target"></select>
+  </label>
+  <form id="folder-form" class="folder-form" hidden>
+    <input id="folder-input" type="text" placeholder="Folder to scan, e.g. C:\code or ~/code" spellcheck="false" autocomplete="off">
+    <button type="submit">Scan</button>
+  </form>
+  <button id="rescan" title="Rescan (Ctrl+R)">Rescan</button>
+  <button id="stop" hidden>Stop</button>
+  <div id="phase" class="phase" aria-live="polite"></div>
+  <div id="free" class="free"></div>
+</header>
+
+<main class="layout">
+  <nav class="sidebar" aria-label="Repositories">
+    <ul id="repos"></ul>
+  </nav>
+
+  <section class="content">
+    <div class="filters">
+      <div class="segmented" role="tablist" id="verdict-filter">
+        <button data-filter="all" class="active">All</button>
+        <button data-filter="safe">Safe to delete</button>
+        <button data-filter="review">Needs review</button>
+      </div>
+      <input id="search" type="search" placeholder="Search name, repo or branch" autocomplete="off">
+    </div>
+
+    <div class="table-wrap">
+      <table id="table">
+        <thead>
+          <tr>
+            <th class="col-check"><input type="checkbox" id="check-all" aria-label="Mark all shown"></th>
+            <th class="col-verdict sortable" data-sort="verdict" title="Verdict"></th>
+            <th class="sortable" data-sort="name">Worktree</th>
+            <th class="sortable" data-sort="repo">Repository</th>
+            <th class="sortable" data-sort="branch">Branch</th>
+            <th>Status</th>
+            <th class="sortable num" data-sort="activity">Last activity</th>
+            <th class="sortable num" data-sort="size">Size</th>
+            <th class="sortable num" data-sort="freed">Frees</th>
+            <th class="col-actions"></th>
+          </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+      <div id="empty" class="empty" hidden></div>
+    </div>
+  </section>
+</main>
+
+<footer class="bottombar">
+  <div id="summary" class="summary"></div>
+  <button id="mark-safe">Mark safe to delete</button>
+  <button id="clear-marks">Clear marks</button>
+  <button id="delete" class="danger" disabled>Delete marked…</button>
+</footer>
+
+<div id="menu" class="menu" role="menu" hidden>
+  <button data-action="reveal" role="menuitem">Show in file manager</button>
+  <button data-action="terminal" role="menuitem">Open in terminal</button>
+  <button data-action="copy" role="menuitem">Copy path</button>
+</div>
+
+<dialog id="dialog">
+  <div id="dialog-body"></div>
+</dialog>
+
+<div id="toast" class="toast" hidden></div>
+</body>
+</html>
