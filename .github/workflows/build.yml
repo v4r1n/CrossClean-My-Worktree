@@ -53,6 +53,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     defaults:
       run:
+        shell: bash
         working-directory: e2e
     steps:
       - uses: actions/checkout@v4
@@ -65,20 +66,13 @@ jobs:
           node-version: 22
           cache: npm
           cache-dependency-path: e2e/package-lock.json
-      - name: Install Playwright
-        run: |
-          npm ci
-          # apt mirrors on hosted runners fail now and then; retry before giving up.
-          for attempt in 1 2 3; do
-            npx playwright install --with-deps chromium && break
-            [[ $attempt == 3 ]] && exit 1
-            echo "::warning::playwright install failed (attempt $attempt), retrying"
-            sleep 20
-          done
+      - name: Install test dependencies
+        run: npm ci
       - name: Run end-to-end tests
         run: npx playwright test
         env:
           CI: "true"
+          PW_CHANNEL: chrome
       - uses: actions/upload-artifact@v4
         if: failure()
         with:

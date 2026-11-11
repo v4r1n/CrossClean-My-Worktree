@@ -203,8 +203,9 @@ func TestEndToEndOpenUsesPlatformCommand(t *testing.T) {
 	if len(*started) != 2 {
 		t.Fatalf("started %d commands", len(*started))
 	}
-	if !slices.ContainsFunc((*started)[0].Args, func(a string) bool { return strings.Contains(a, filepath.Base(path)) }) {
-		t.Errorf("reveal args %v lack the path", (*started)[0].Args)
+	// Explorer and Finder select the folder itself; xdg-open can only open its parent.
+	if !slices.ContainsFunc((*started)[0].Args, func(a string) bool { return strings.Contains(a, filepath.Dir(path)) }) {
+		t.Errorf("reveal args %v lack the worktree's location", (*started)[0].Args)
 	}
 }
 

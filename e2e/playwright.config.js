@@ -11,6 +11,9 @@ export default defineConfig({
   reporter: process.env.CI ? [["list"], ["html", { open: "never" }]] : "list",
   use: {
     ...devices["Desktop Chrome"],
+    // CI uses the Google Chrome that hosted runners already have (PW_CHANNEL=chrome),
+    // which avoids downloading browsers and installing system packages.
+    channel: process.env.PW_CHANNEL || undefined,
     viewport: { width: 1280, height: 800 },
     trace: "retain-on-failure",
   },
