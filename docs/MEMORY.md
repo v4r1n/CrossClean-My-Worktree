@@ -51,7 +51,6 @@
 
 ### Low
 - Keyboard: highlight rows + Space (มีใน Swift เดิม)
-- `docs/promo.png` ยังเป็นภาพ macOS app เดิม
 
 ---
 
