@@ -17,6 +17,28 @@ function readToken() {
 let token = readToken();
 addEventListener("hashchange", () => { token = readToken(); refresh(); });
 
+// Theme toggle. theme.js applies a saved choice before first paint; without one the OS decides.
+const THEME_KEY = "cleanmywt-theme";
+const themeButton = document.getElementById("theme");
+const darkQuery = matchMedia("(prefers-color-scheme: dark)");
+function effectiveTheme() {
+  return document.documentElement.dataset.theme || (darkQuery.matches ? "dark" : "light");
+}
+function renderThemeButton() {
+  const next = effectiveTheme() === "dark" ? "light" : "dark";
+  const label = `Switch to ${next} theme`;
+  themeButton.title = label;
+  themeButton.setAttribute("aria-label", label);
+}
+themeButton.addEventListener("click", () => {
+  const next = effectiveTheme() === "dark" ? "light" : "dark";
+  document.documentElement.dataset.theme = next;
+  try { localStorage.setItem(THEME_KEY, next); } catch { /* storage blocked: applies for this tab only */ }
+  renderThemeButton();
+});
+darkQuery.addEventListener("change", renderThemeButton);
+renderThemeButton();
+
 class ApiError extends Error {
   constructor(message, status) { super(message); this.status = status; }
 }

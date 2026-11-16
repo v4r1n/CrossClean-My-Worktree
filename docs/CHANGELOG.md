@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Light/dark theme toggle at the far right of the header. The choice is saved in the browser and wins over
+  the OS setting; with nothing saved the UI follows the OS. A small `theme.js` applies it before first paint.
+- Browser E2E tests for the theme toggle (switching, persistence, OS default, blocked storage).
 - Browser end-to-end tests (Playwright, Chromium) that drive the real `cleanmywt` binary on Windows, macOS
   and Linux: scan, verdicts, filters, search, sorting, shift-click marking, safe and risky deletes, branch
   deletion, cancel, choosing a folder, the row menu and token enforcement (`e2e/`).
@@ -19,8 +22,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The release job unzips the linux/amd64 archive and runs `wtscan` from it before uploading.
 - Tags with a pre-release suffix (e.g. `v2.1.0-rc.1`) publish a GitHub pre-release.
 
+### Changed
+
+- The header logo and favicon now use the CrossClean mark (`crosscleanmywt-mark.svg`, with a
+  `-dark` variant). The logo follows the theme toggle; the favicon follows the OS colour scheme. `icon.svg` is removed.
+
 ### Fixed
 
+- E2E teardown no longer fails on Windows when the temp folder is still locked.
 - `cleanmywt` stops a running scan when it shuts down.
 - On macOS, a worktree whose folder is already gone under a symlinked path (such as `/var` → `/private/var`)
   no longer fails to match git's record of it; paths that don't exist are now resolved through their

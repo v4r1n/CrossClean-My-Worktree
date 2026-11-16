@@ -28,6 +28,7 @@
 - `cleanmywt` web UI ครบ feature หลักของแอปเดิม (sidebar repo, filter, search, sort, mark/shift-click, mark safe, delete dialog + ack risky + branch, report, row menu)
 - Security: token + Host allow-list + CSP + scan-scoped paths (ADR-003)
 - `wtscan` CLI output format เดิม
+- UI: ปุ่ม light/dark (มุมขวาสุดของ header, จำใน `localStorage` key `cleanmywt-theme`, `theme.js` ตั้งก่อน paint เพราะ CSP ห้าม inline), โลโก้ตามปุ่ม, favicon ตาม OS (`media` บน `<link rel=icon>`); E2E 4 test
 - CI matrix + `scripts/dist.sh` release zips
 - Code review (code-reviewer agent): 0 CRITICAL/HIGH; แก้แล้วทุกข้อ — terminal injection, long path, measured-freed ผิดไดรฟ์, disk query ใต้ lock, badge "Repo not found"
 

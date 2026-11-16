@@ -1,5 +1,4 @@
 :root {
-  color-scheme: light dark;
   --bg: #ffffff;
   --panel: #f6f7f9;
   --border: #d9dde3;
@@ -16,7 +15,7 @@
   font: 13px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     --bg: #0d1117;
     --panel: #161b22;
     --border: #30363d;
@@ -30,8 +29,36 @@
     --warn: #db8a3a;
     --bad: #f85149;
     --neutral: #8d96a0;
+    color-scheme: dark;
   }
 }
+:root[data-theme="dark"] {
+  --bg: #0d1117;
+  --panel: #161b22;
+  --border: #30363d;
+  --text: #e6edf3;
+  --muted: #8d96a0;
+  --accent: #4493f8;
+  --row-hover: #1b2330;
+  --row-checked: #172a45;
+  --good: #3fb950;
+  --info: #4493f8;
+  --warn: #db8a3a;
+  --bad: #f85149;
+  --neutral: #8d96a0;
+  color-scheme: dark;
+}
+:root[data-theme="light"] { color-scheme: light; }
+
+/* Logo and toggle icon follow the effective theme. */
+.logo-dark, .icon-sun { display: none; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .logo-light, :root:not([data-theme="light"]) .icon-moon { display: none; }
+  :root:not([data-theme="light"]) .logo-dark, :root:not([data-theme="light"]) .icon-sun { display: inline; }
+}
+:root[data-theme="dark"] .logo-light, :root[data-theme="dark"] .icon-moon { display: none; }
+:root[data-theme="dark"] .logo-dark, :root[data-theme="dark"] .icon-sun { display: inline; }
+.icon-btn { display: inline-flex; align-items: center; padding: 5px 7px; }
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
 html, body { height: 100%; margin: 0; }

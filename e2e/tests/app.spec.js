@@ -162,3 +162,54 @@ test("a tab without the launch token can't use the API", async ({ page, app }) =
   await expect(page.locator("#phase")).toContainText("isn't connected");
   await expect(rows(page)).toHaveCount(0);
 });
+
+test.describe("theme toggle", () => {
+  const html = (page) => page.locator("html");
+  const toggle = (page) => page.locator("#theme");
+
+  test("is the last control in the header and switches logo and theme", async ({ page, app }) => {
+    await page.emulateMedia({ colorScheme: "light" });
+    await page.goto(app.url);
+    await waitForScan(page);
+
+    const last = page.locator("header.toolbar > *:visible").last();
+    await expect(last).toHaveId("theme");
+    await expect(page.locator(".logo-light")).toBeVisible();
+    await expect(page.locator(".logo-dark")).toBeHidden();
+    await expect(toggle(page)).toHaveAttribute("aria-label", "Switch to dark theme");
+
+    await toggle(page).click();
+    await expect(html(page)).toHaveAttribute("data-theme", "dark");
+    await expect(page.locator(".logo-dark")).toBeVisible();
+    await expect(page.locator(".logo-light")).toBeHidden();
+    await expect(toggle(page)).toHaveAttribute("aria-label", "Switch to light theme");
+    await expect(page.locator("body")).toHaveCSS("background-color", "rgb(13, 17, 23)");
+  });
+
+  test("remembers the choice over the OS setting after reload", async ({ page, app }) => {
+    await page.emulateMedia({ colorScheme: "light" });
+    await page.goto(app.url);
+    await toggle(page).click();
+    await page.reload();
+    await expect(html(page)).toHaveAttribute("data-theme", "dark");
+    await expect(page.locator(".logo-dark")).toBeVisible();
+  });
+
+  test("follows the OS when nothing is saved", async ({ page, app }) => {
+    await page.emulateMedia({ colorScheme: "dark" });
+    await page.goto(app.url);
+    await expect(page.locator(".logo-dark")).toBeVisible();
+    await expect(toggle(page)).toHaveAttribute("aria-label", "Switch to light theme");
+  });
+
+  test("still works when localStorage is blocked", async ({ page, app }) => {
+    await page.addInitScript(() => {
+      Object.defineProperty(window, "localStorage", { get() { throw new Error("blocked"); } });
+    });
+    await page.emulateMedia({ colorScheme: "light" });
+    await page.goto(app.url);
+    await waitForScan(page);
+    await toggle(page).click();
+    await expect(html(page)).toHaveAttribute("data-theme", "dark");
+  });
+});

@@ -157,7 +157,7 @@ cmd/
 internal/
   wtkit/           scanning, git inspection, disk usage and removal (no UI)
   app/             HTTP API and state for the app
-  app/web/         the browser UI (plain HTML, CSS and JavaScript, embedded in the binary)
+  app/web/         the browser UI (plain HTML, CSS and JavaScript, embedded in the binary; light/dark theme)
 scripts/
   dist.sh          cross-compiles release zips
   coverage.sh      runs the Go tests with an 80% coverage gate

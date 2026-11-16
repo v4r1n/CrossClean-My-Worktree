@@ -74,7 +74,12 @@ export const test = base.extend({
     await use({ url, home, fixture });
     child.kill();
     await new Promise((r) => (child.exitCode !== null ? r() : child.once("exit", r)));
-    rmSync(home, { recursive: true, force: true, maxRetries: 5 });
+    // Windows can briefly hold the folder (Chrome or the just-killed server) after the test ends.
+    try {
+      rmSync(home, { recursive: true, force: true, maxRetries: 10, retryDelay: 200 });
+    } catch (err) {
+      if (process.platform !== "win32") throw err;
+    }
   },
 });
 
