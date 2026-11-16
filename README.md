@@ -7,7 +7,7 @@
 ![License: MIT](https://img.shields.io/badge/license-MIT-green)
 [![Latest release](https://img.shields.io/github/v/release/v4r1n/CrossClean-My-Worktree)](https://github.com/v4r1n/CrossClean-My-Worktree/releases/latest)
 
-![Clean My Worktree: every worktree on your computer in one window, with repository, branch, status, last activity and disk usage](docs/promo.png)
+![CrossClean My Worktree: find and remove forgotten git worktrees and get your disk space back, on Windows, macOS and Linux](docs/readme-pr.png)
 
 > CrossClean My Worktree is a cross-platform port of [poomsc/Clean-My-Worktree](https://github.com/poomsc/Clean-My-Worktree), the original macOS app, rewritten in Go so it also runs on Windows and Linux. See [docs/CHANGELOG.md](docs/CHANGELOG.md) and [docs/MIGRATING.md](docs/MIGRATING.md).
 
